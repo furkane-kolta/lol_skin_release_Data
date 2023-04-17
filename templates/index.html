@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+
+<body>
+    <main>
+        <h1>{{title}}</h1>
+        <table id="champions">
+            <thead>
+                <tr>
+                    <th onclick="sortTable(0)">Champion</th>
+                    <th onclick="sortTable(1)">Release Date</th>
+                    <th onclick="sortTable(2)">Total Skins</th>
+                    <th onclick="sortTable(3)">Average Days Between Two Skins</th>
+                    <th onclick="sortTable(4)">Last Skin Released Days Ago</th>
+                </tr>
+            </thead>
+            <tbody id="list">
+                {% for champion in champions %}
+                <tr>
+                    <td>{{champion.champion_name}}</td>
+                    <td>{{champion.champion_release_date}}</td>
+                    <td>{{champion.champion_skin_count}}</td>
+                    <td>{{champion.champion_attention_division}}</td>
+                    <td>{{champion.champion_last_skin_days_ago}}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </main>
+</body>
+<script>
+    let sorting_order = "ascending";
+
+    function sortTable(columnIndex) {
+        var table, rows, switching, i, x, y, shouldSwitch;
+        table = document.getElementById("champions");
+        switching = true;
+        while (switching) {
+            switching = false;
+            rows = table.getElementsByTagName("tr");
+            for (i = 1; i < (rows.length - 1); i++) {
+                shouldSwitch = false;
+                x = rows[i].getElementsByTagName("td")[columnIndex];
+                y = rows[i + 1].getElementsByTagName("td")[columnIndex];
+                if (columnIndex === 0) {
+                    if (sorting_order === "descending") {
+                        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (sorting_order === "ascending") {
+                        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                } else if (columnIndex === 2 || columnIndex === 3 || columnIndex === 4) {
+                    if (sorting_order === "descending") {
+                        if (parseInt(x.innerHTML) > parseInt(y.innerHTML)) {
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (sorting_order === "ascending") {
+                        if (parseInt(x.innerHTML) < parseInt(y.innerHTML)) {
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                } else if (columnIndex === 1) {
+                    if (sorting_order === "descending") {
+                        if (isNaN(Date.parse(x.innerHTML)) || isNaN(Date.parse(y.innerHTML))) {
+                            // Compare as strings
+                            if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                                shouldSwitch = true;
+                                break;
+                            }
+                        } else {
+                            // Convert to Date objects and compare
+                            var xDate = new Date(x.innerHTML);
+                            var yDate = new Date(y.innerHTML);
+                            if (xDate > yDate) {
+                                shouldSwitch = true;
+                                break;
+                            }
+                        }
+                    } else if (sorting_order === "ascending") {
+                        if (isNaN(Date.parse(x.innerHTML)) || isNaN(Date.parse(y.innerHTML))) {
+                            // Compare as strings
+                            if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                                shouldSwitch = true;
+                                break;
+                            }
+                        } else {
+                            // Convert to Date objects and compare
+                            var xDate = new Date(x.innerHTML);
+                            var yDate = new Date(y.innerHTML);
+                            if (xDate < yDate) {
+                                shouldSwitch = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            if (shouldSwitch) {
+                rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                switching = true;
+            }
+        }
+        sorting_order = sorting_order === "ascending" ? "descending" : "ascending";
+
+        // Remove any existing sorting classes from other table headers
+        var headers = table.getElementsByTagName("th");
+        for (var j = 0; j < headers.length; j++) {
+            headers[j].classList.remove("sorting");
+        }
+
+        // Add the sorting class to the clicked table header
+        var clickedHeader = table.getElementsByTagName("th")[columnIndex];
+        clickedHeader.classList.add("sorting");
+    }
+</script>
+
+</html>
